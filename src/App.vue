@@ -6,24 +6,20 @@
       <header class="headerModal">заказать звонок </header>
       <main class="contactsInInModal">
       <label class="contacts">имя
-        <input type="text" name="name" :class="{'invalid-field': invalidForm.name}"  placeholder="Имя" v-model="dataForm.name">
+        <input type="text" name="name" :class="{'invalid-field': invalidForm.name}"  @blur="isNameTouched = true" placeholder="Имя" v-model="dataForm.name">
       </label>
       <label class="contacts">телефон
-        <the-mask :mask="['7(###) ###-##-##']" name="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(###) ###-##-##" v-model="dataForm.phone"/>
+        <the-mask :mask="['7(###) ###-##-##']" name="phone" @blur="isPhoneTouched = true" :class="{'invalid-field': invalidForm.phone}" placeholder="7(###) ###-##-##" v-model="dataForm.phone"/>
       </label>
       <label class="contacts">время звонка
       <select name="time" v-model="dataForm.timeOfCalling">
-<option> 9:00 </option>
-<option> 10:00 </option>
-<option> 11:00 </option>
-<option> 12:00 </option>
-<option> 13:00 </option>
-</select>
+        <option v-for="time of times">{{time}}</option> 
+      </select>
       </label>
       </main>
       <footer>
       <button class="sendEmailButton" @click="sendEmail">отправить</button>
-      <div v-if="this.error">{{ error }}</div>
+      <div v-if="error">{{ error }}</div>
            
       </footer>
       </form>
@@ -46,34 +42,31 @@ export default {
       phone: '',
       timeOfCalling: null,
     },
-   invalidForm: {
-     name: false,
-     phone: false
-   },
-   error: null
+    times: ['09:00','10:00','11:00','12:00'],
+    isNameTouched: false,
+    isPhoneToched: false,
+    error: null
   }),
-  // computed: {
-  //   invalidForm () { 
-  //     return { 
-  //       name: this.dataForm.name = ([A-Za-zА-Яа-яЁё]) ? true: false,
-  //       phone: this.dataForm.phone.length === 10 ? true: false
-  //     } 
-  //   }
-  // },
+  computed: {
+    invalidForm () { 
+      return { 
+        name:  !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) ? true: false,
+        phone: this.dataForm.phone.length === 10 ? false: true
+      } 
+    }
+  },
   methods: {
-    
     openModal() {
       this.$modal.show('emailForm')
     },
     sendEmail() {
-      
+      this.error = null
       this.invalidForm.phone = this.dataForm.phone.length === 10 ? false : true
       this.invalidForm.name = (!/[A-Za-zА-Яа-яЁё]/.test(this.dataForm.name) || !this.dataForm.name)  ? true : false
-    
       
-      if( !this.invalidForm.name && !this.invalidForm.phone ){
+      if( this.invalidForm.name && this.invalidForm.phone ){
         
-          const response = fetch('sendemail.php',{method: 'POST', body: this.dataForm});
+          const response = fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
          
             if(!response.ok) { throw new Error(`Ошибка, статус ошибки ${response.status}`);}
              else { 
@@ -83,11 +76,11 @@ export default {
                title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
                showConfirmButton: true,
               })
-              dataForm.reset()
+              
              }
       } else { 
-         this.error = "Пожалуйста, заполните корректно поля!"
-         this.dataForm.reset()
+         this.error="Пожалуйста, заполните корректно поля!"
+         
         }
         
     }
