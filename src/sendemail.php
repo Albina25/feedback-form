@@ -1,4 +1,4 @@
-<? php>
+<?php
 // $inputJSON = file_get_contents('php://input');
 // $input = json_decode($inputJSON, TRUE);
 
@@ -6,12 +6,21 @@
 // $phone = $input['phone'];
 
 // $message = "Name: ".$name."\nPhone: ".$phone;
-$name = 'Имя: '.$_POST['name'].' <br />';
-$mail =  'Почта: '.$_POST['phone'].' <br />';
-$time =  'Время: '.$_POST['time'].' <br />';
+$c = true;
+$name = 'Имя: '.$_POST['name'];
+$mail =  'Почта: '.$_POST['phone'];
+$time =  'Время: '.$_POST['time'];
 $allInOne =  $name.$phone.$time;
 $to = 'axioma.25@gmail.com'; 
-$headers="From: Alexryabikov.ru <site@test.ru>\nReply-to:info@alexryabikov.ru\nContent-Type: text/html; charset=\"utf-8\"\n"; 
-    // функция, которая отправляет наше письмо
-mail($to, 'Свяжитесь с нами', $AllInOne, $headers); 
+$headers="From: Site <site@test.ru>\nContent-Type: text/html; charset=\"utf-8\"\n"; 
+ 
+if (mail($to, 'Свяжитесь с нами', $AllInOne, $headers)) {
+    http_response_code(200);
+    echo "Данные отправлены.";
+} else {
+    http_response_code(400);
+    echo "Ошибка. Данные не отправлены.";
+  }
+
+ 
 ?>

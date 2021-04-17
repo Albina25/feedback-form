@@ -1,33 +1,33 @@
 <template>
   <div id="app">
-    <button class="buttonForCalling" type="button" @click="openModal()">Заказать звонок</button>
+    <button class="btn" type="button" @click="openModal()">Заказать звонок</button>
 <modal name="emailForm">
-  <form class="formOfModal" @submit.prevent="sendEmail">
-      <header class="headerModal">заказать звонок </header>
+  <form class="form" @submit.prevent="sendEmail">
+      <header class="headerOfModal">заказать звонок </header>
       <main class="contactsInInModal">
-      <label class="contacts">имя
-        <input type="text" name="name" :class="{'invalid-field': invalidForm.name}"  @blur="isNameTouched = true" placeholder="Имя" v-model="dataForm.name">
-      </label>
-      <label class="contacts">телефон
-        <the-mask :mask="['7(###) ###-##-##']" name="phone" @blur="isPhoneTouched = true" :class="{'invalid-field': invalidForm.phone}" placeholder="7(###) ###-##-##" v-model="dataForm.phone"/>
-      </label>
-      <label class="contacts">время звонка
-      <select name="time" v-model="dataForm.timeOfCalling">
-        <option v-for="time of times">{{time}}</option> 
-      </select>
-      </label>
+      <div class="form-row">
+       <label class="title">имя</label>
+          <input class="inputData" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}"  @blur="isNameTouched = true" placeholder="Имя" v-model="dataForm.name">
+      </div>
+      <div class="form-row">
+        <label class="title">телефон</label>
+          <the-mask class="inputData" :mask="['7(###) ###-##-##']" tabindex=2 name="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
+      </div>
+      <div class="form-row">
+        <label class="title">время звонка</label>
+          <select class="inputData" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
+            <option v-for="time of times" :key="time">{{time}}</option> 
+          </select>
+      </div>
       </main>
       <footer>
-      <button class="sendEmailButton" @click="sendEmail">отправить</button>
-      <div v-if="error">{{ error }}</div>
+      <button class="btn1" tabindex=4 @click="sendEmail">отправить</button>
+      <div class="error" v-if="error">{{ error }}</div>
            
       </footer>
       </form>
 </modal>
-<!-- <dialog class="callingModal" ref="callingModal">
-      
-    </dialog>
-<div id="resultForm"></div>  -->
+
   </div>
 </template>
 
@@ -50,8 +50,8 @@ export default {
   computed: {
     invalidForm () { 
       return { 
-        name:  !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) ? true: false,
-        phone: this.dataForm.phone.length === 10 ? false: true
+        name:  !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name),
+        phone: this.dataForm.phone.length === 10 ? false : true
       } 
     }
   },
@@ -60,11 +60,10 @@ export default {
       this.$modal.show('emailForm')
     },
     sendEmail() {
-      this.error = null
-      this.invalidForm.phone = this.dataForm.phone.length === 10 ? false : true
-      this.invalidForm.name = (!/[A-Za-zА-Яа-яЁё]/.test(this.dataForm.name) || !this.dataForm.name)  ? true : false
+      this.invalidForm.phone = !this.dataForm.phone.length === 10 ? true : false 
+      this.invalidForm.name = !/[A-Za-zА-Яа-яЁё]/.test(this.dataForm.name) ? true : false
       
-      if( this.invalidForm.name && this.invalidForm.phone ){
+      if(!this.invalidForm.name && !this.invalidForm.phone ){
         
           const response = fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
          
@@ -96,8 +95,70 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  font-size: 20px;
+}
+.valid {
+  border-color: black;
 }
 .invalid-field {
     border-color: red;
 }
+.headerOfModal {
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.btn {
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  background-color: white;
+  border: 2px solid #4CAF50;
+  padding: 0.5rem;
+}
+.btn:hover {
+    background-color: #FFFAFA;
+    }
+.btn1 {
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.form {
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.contactsInInModal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  flex-direction: column;
+  width: 100%;
+}
+.title {
+  display: flex;
+  justify-content: space-between;
+  margin-right: 1rem;
+  flex: 1;
+}
+.inputData {
+  flex: 2;
+  height: 2rem;
+}
+.form-row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-bottom: 1rem;
+  align-items: center;
+  justify-content: flex-end;
+  width: 90%;
+}
+.error {
+    font-size: 15px;
+    color: red;
+}
+
 </style>
