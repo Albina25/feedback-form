@@ -1,9 +1,13 @@
 <template>
   <div id="app">
-    <button class="btn" type="button" @click="openModal()">Заказать звонок</button>
+    <button class="btn" type="button" @click="openModal">Заказать звонок</button>
 <modal name="emailForm">
   <form class="form" @submit.prevent="sendEmail">
-      <header class="header-modal">заказать звонок </header>
+      <header>
+        <div class="header-modal">заказать звонок 
+          <i class="fa fa-whatsapp"></i>
+        </div>
+      </header>
       <main class="contacts-in-modal">
       <div class="form-row">
        <label class="title">имя</label>
@@ -16,7 +20,7 @@
       <div class="form-row">
         <label class="title">время звонка</label>
           <select class="input-data" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
-            <option v-for="time of times" :key="time">{{time}}</option> 
+            <option v-for="(time, index) of times" :key="index">{{time}}</option> 
           </select>
       </div>
       </main>
@@ -43,7 +47,8 @@ export default {
       timeOfCalling: null,
     },
     times: ['09:00','10:00','11:00','12:00'],
-    error: null
+    error: null,
+    invalidError: false
   }),
   computed: {
     invalidForm () { 
@@ -51,18 +56,27 @@ export default {
         name:  !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name),
         phone: this.dataForm.phone && this.dataForm.phone.length !== 10 ? true : false
       } 
-    }
-  },
+    },
+  
+   },
   methods: {
     openModal() {
       this.$modal.show('emailForm')
-      
     },
+    checkForm () {
+      let count = 0;
+      for (let value of  Object.values(this.invalidForm))
+      if (value) count++;
+      if (count > 0) {return true;}
+      else {return false;}
+    },
+      
+    
     sendEmail() {
       this.invalidForm.phone = this.dataForm.phone.length !== 10 ? true : false 
       this.invalidForm.name = !/[A-Za-zА-Яа-яЁё]/.test(this.dataForm.name) ? true : false
-      
-      if(!this.invalidForm.name && !this.invalidForm.phone ){
+      this.invalidError = this.checkForm(); 
+      if(!this.invalidError){
         
           const response = fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
          
@@ -104,6 +118,7 @@ export default {
 .header-modal {
   text-transform: uppercase;
   margin-bottom: 1rem;
+  width: 100%;
 }
 .btn {
   text-transform: uppercase;
@@ -145,6 +160,7 @@ export default {
 .input-data {
   flex: 2;
   height: 2rem;
+  font-size: 1.2rem;
 }
 .form-row {
   display: flex;
