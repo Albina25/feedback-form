@@ -7,7 +7,7 @@
       <main class="contactsInInModal">
       <div class="form-row">
        <label class="title">имя</label>
-          <input class="inputData" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}"  @blur="isNameTouched = true" placeholder="Имя" v-model="dataForm.name">
+          <input class="inputData" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
       </div>
       <div class="form-row">
         <label class="title">телефон</label>
@@ -43,24 +43,23 @@ export default {
       timeOfCalling: null,
     },
     times: ['09:00','10:00','11:00','12:00'],
-    isNameTouched: false,
-    isPhoneToched: false,
     error: null
   }),
   computed: {
     invalidForm () { 
       return { 
         name:  !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name),
-        phone: this.dataForm.phone.length === 10 ? false : true
+        phone: this.dataForm.phone && this.dataForm.phone.length !== 10 ? true : false
       } 
     }
   },
   methods: {
     openModal() {
       this.$modal.show('emailForm')
+      
     },
     sendEmail() {
-      this.invalidForm.phone = !this.dataForm.phone.length === 10 ? true : false 
+      this.invalidForm.phone = this.dataForm.phone.length !== 10 ? true : false 
       this.invalidForm.name = !/[A-Za-zА-Яа-яЁё]/.test(this.dataForm.name) ? true : false
       
       if(!this.invalidForm.name && !this.invalidForm.phone ){
@@ -79,7 +78,6 @@ export default {
              }
       } else { 
          this.error="Пожалуйста, заполните корректно поля!"
-         
         }
         
     }
