@@ -3,25 +3,25 @@
     <button class="btn" type="button" @click="openModal()">Заказать звонок</button>
 <modal name="emailForm">
   <form class="form" @submit.prevent="sendEmail">
-      <header class="headerOfModal">заказать звонок </header>
-      <main class="contactsInInModal">
+      <header class="header-modal">заказать звонок </header>
+      <main class="contacts-in-modal">
       <div class="form-row">
        <label class="title">имя</label>
-          <input class="inputData" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
+          <input class="input-data" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
       </div>
       <div class="form-row">
         <label class="title">телефон</label>
-          <the-mask class="inputData" :mask="['7(###) ###-##-##']" tabindex=2 name="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
+          <the-mask class="input-data" :mask="['7(###) ###-##-##']" tabindex=2 name="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
       </div>
       <div class="form-row">
         <label class="title">время звонка</label>
-          <select class="inputData" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
+          <select class="input-data" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
             <option v-for="time of times" :key="time">{{time}}</option> 
           </select>
       </div>
       </main>
       <footer>
-      <button class="btn1" tabindex=4 @click="sendEmail">отправить</button>
+      <button class="btn-send" tabindex=4 @click="sendEmail">отправить</button>
       <div class="error" v-if="error">{{ error }}</div>
            
       </footer>
@@ -101,7 +101,7 @@ export default {
 .invalid-field {
     border-color: red;
 }
-.headerOfModal {
+.header-modal {
   text-transform: uppercase;
   margin-bottom: 1rem;
 }
@@ -115,7 +115,7 @@ export default {
 .btn:hover {
     background-color: #FFFAFA;
     }
-.btn1 {
+.btn-send {
   text-transform: uppercase;
   margin-bottom: 1rem;
 }
@@ -127,7 +127,7 @@ export default {
   padding: 1rem;
 }
 
-.contactsInInModal {
+.contacts-in-modal {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -142,7 +142,7 @@ export default {
   margin-right: 1rem;
   flex: 1;
 }
-.inputData {
+.input-data {
   flex: 2;
   height: 2rem;
 }
