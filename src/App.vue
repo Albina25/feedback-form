@@ -68,9 +68,8 @@ export default {
     },
     checkForm () {
       let count = 0;
-      let arr =  Object.values(this.invalidForm);
-      for (let value of arr)
-      if (value) count++;
+      for (let key in this.invalidForm)
+      if (this.invalidForm[key]) count++;
       return count;
     },
       
