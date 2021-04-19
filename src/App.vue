@@ -3,26 +3,27 @@
     <button class="btn" type="button" @click="openModal">Заказать звонок</button>
 <modal name="emailForm">
   <form class="form" @submit.prevent="sendEmail">
-      <header>
-        <div class="header-modal">заказать звонок 
-          <i class="fa fa-whatsapp"></i>
-        </div>
+      <header class="header-modal">
+       <div class="title-form">заказать звонок</div>
+       <i class="icon-close far fa-times-circle fa-lg" @click="closeModal()"></i>
+       
       </header>
       <main class="contacts-in-modal">
-      <div class="form-row">
-       <label class="title">имя</label>
+      
+        <label class="form-row">
+       <span class="title">имя</span>
           <input class="input-data" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
-      </div>
-      <div class="form-row">
-        <label class="title">телефон</label>
+        </label>
+      <label class="form-row">
+        <span class="title">телефон</span>
           <the-mask class="input-data" :mask="['7(###) ###-##-##']" tabindex=2 name="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
-      </div>
-      <div class="form-row">
-        <label class="title">время звонка</label>
-          <select class="input-data" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
+      </label>
+      <label class="form-row">
+        <span class="title">время звонка</span>
+          <select class="input-data" type="text" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
             <option v-for="(time, index) of times" :key="index">{{time}}</option> 
           </select>
-      </div>
+      </label>
       </main>
       <footer>
       <button class="btn-send" tabindex=4 @click="sendEmail">отправить</button>
@@ -48,7 +49,6 @@ export default {
     },
     times: ['09:00','10:00','11:00','12:00'],
     error: null,
-    invalidError: false
   }),
   computed: {
     invalidForm () { 
@@ -63,21 +63,25 @@ export default {
     openModal() {
       this.$modal.show('emailForm')
     },
+     closeModal() {
+     this.$modal.hide('emailForm')
+    },
     checkForm () {
       let count = 0;
-      for (let value of  Object.values(this.invalidForm))
+      let arr =  Object.values(this.invalidForm);
+      for (let value of arr)
       if (value) count++;
-      if (count > 0) {return true;}
-      else {return false;}
+      return count;
     },
       
     
     sendEmail() {
-      this.invalidForm.phone = this.dataForm.phone.length !== 10 ? true : false 
-      this.invalidForm.name = !/[A-Za-zА-Яа-яЁё]/.test(this.dataForm.name) ? true : false
-      this.invalidError = this.checkForm(); 
-      if(!this.invalidError){
-        
+     
+      let errors = 0;
+      errors = this.checkForm(); 
+   
+      if(!errors){
+          this.error = null
           const response = fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
          
             if(!response.ok) { throw new Error(`Ошибка, статус ошибки ${response.status}`);}
@@ -107,7 +111,25 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-  font-size: 20px;
+}
+ * {
+  padding: 0;
+  margin: 0;
+  font-size: 18px;
+  font-family: Roboto, sans-serif;
+  box-sizing: border-box;
+} 
+.title-form {
+  display: block;
+  position: absolute;
+  left: 35%;
+  }
+.icon-close {
+  display: block;
+  position: absolute;
+  right: 2%;
+  color: lightgrey;
+  
 }
 .valid {
   border-color: black;
@@ -119,6 +141,8 @@ export default {
   text-transform: uppercase;
   margin-bottom: 1rem;
   width: 100%;
+  height: 1rem;
+  flex-wrap: nowrap;
 }
 .btn {
   text-transform: uppercase;
@@ -133,6 +157,7 @@ export default {
 .btn-send {
   text-transform: uppercase;
   margin-bottom: 1rem;
+  padding: 0.1rem;
 }
 .form {
   display: flex;
@@ -147,20 +172,19 @@ export default {
   align-items: center;
   justify-content: space-between;
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
   flex-direction: column;
   width: 100%;
 }
 .title {
   display: flex;
   justify-content: space-between;
-  margin-right: 1rem;
-  flex: 1;
+  flex: 2;
 }
 .input-data {
   flex: 2;
   height: 2rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 .form-row {
   display: flex;
