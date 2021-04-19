@@ -74,15 +74,15 @@ export default {
     },
       
     
-    sendEmail() {
+    async sendEmail() {
      
       let errors = 0;
       errors = this.checkForm(); 
    
       if(!errors){
           this.error = null
-          const response = fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
-         
+          const response = await fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
+          
             if(!response.ok) { throw new Error(`Ошибка, статус ошибки ${response.status}`);}
              else { 
               return  Swal.fire({
@@ -91,7 +91,6 @@ export default {
                title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
                showConfirmButton: true,
               })
-              
              }
       } else { 
          this.error="Пожалуйста, заполните корректно поля!"
