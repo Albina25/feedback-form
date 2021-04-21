@@ -1,38 +1,37 @@
 <template>
   <div id="app">
     <button class="btn" type="button" @click="openModal">Заказать звонок</button>
-<modal name="emailForm">
-  <form class="form" @submit.prevent="sendEmail">
-      <header class="header-modal">
-       <div class="title-form">заказать звонок</div>
-       <i class="icon-close far fa-times-circle fa-lg" @click="closeModal()"></i>
-       
+    <modal name="emailForm" height= 'auto'>
+    <form class="form" @submit.prevent="sendEmail">
+     <header class="header-modal">
+        <div class="title-form">заказать звонок</div>
+        <i class="icon-close far fa-times-circle fa-lg" @click="closeModal"></i>
       </header>
       <main class="contacts-in-modal">
-      
         <label class="form-row">
-       <span class="title">имя</span>
-          <input class="input-data" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
+          <span class="title">имя</span>
+          <input class="input-data" type="text" id="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
         </label>
-      <label class="form-row">
-        <span class="title">телефон</span>
-          <the-mask class="input-data" :mask="['7(###) ###-##-##']" tabindex=2 name="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
-      </label>
-      <label class="form-row">
-        <span class="title">время звонка</span>
-          <select class="input-data" type="text" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
-            <option v-for="(time, index) of times" :key="index">{{time}}</option> 
-          </select>
-      </label>
+        <div class="error" v-for="(item,index) in err.name" :key="index">{{ item }}</div>
+        <label class="form-row">
+          <span class="title">телефон</span>
+            <the-mask class="input-data" :mask="['7(###) ###-##-##']" tabindex=2 id="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
+        </label>
+        <div class="error" v-for="(item,index) in err.phone" :key="index">{{ item }}</div>
+        <label class="form-row">
+          <span class="title">время звонка</span>
+            <select class="input-data" id="time" tabindex=3 v-model="dataForm.timeOfCalling">
+              <option v-for="(time, index) of times" :key="index">{{time}}</option> 
+            </select>
+        </label>
+        <div class="error" v-for="(item,index) in err.time" :key="index">{{ item }}</div>
       </main>
       <footer>
-      <button class="btn-send" tabindex=4 @click="sendEmail">отправить</button>
-      <div class="error" v-if="error">{{ error }}</div>
-           
+        <button class="btn-send" tabindex=4 @click="sendEmail">отправить</button>
+        <div class="error" v-if="error">{{ error }}</div>
       </footer>
-      </form>
-</modal>
-
+    </form>
+    </modal>
   </div>
 </template>
 
@@ -48,17 +47,18 @@ export default {
       timeOfCalling: null,
     },
     times: ['09:00','10:00','11:00','12:00'],
+    err: {},
     error: null,
+    check: false
   }),
   computed: {
     invalidForm () { 
       return { 
-        name:  !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name),
-        phone: this.dataForm.phone && this.dataForm.phone.length !== 10 ? true : false
+        name:  (!this.dataForm.name || !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name)) && this.check,
+        phone: this.check && (!this.dataForm.phone || this.dataForm.phone.length !== 10) ? true : false
       } 
     },
-  
-   },
+  },
   methods: {
     openModal() {
       this.$modal.show('emailForm')
@@ -67,34 +67,72 @@ export default {
      this.$modal.hide('emailForm')
     },
     checkForm () {
+      this.err.name = [];
+      this.err.phone = [];
+      this.err.time = [];
       let count = 0;
-      for (let key in this.invalidForm) {
-       if (this.invalidForm[key]) count++;
-        return count;
+      if (!this.dataForm.name) {
+        this.err.name.push ('Поле обязательно для заполнения.');
+        count++;
       }
-    },
-      
-    
-    async sendEmail() {
+      if (!/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name)) {
+        this.err.name.push ('Првоерьте правильность написания.');
+        count++;
+      }
+      if (!this.err.name.length) {
+        delete this.err.name;
+      }
+      if (!this.dataForm.phone) {
+        this.err.phone.push ('Поле обязательно для заполнения.');
+        count++;
+      }
+      if (this.dataForm.phone.length !== 10 &&  this.dataForm.phone) {
+        this.err.phone.push ('Проверьте количество цифр.');
+        count++;
+      }  
+      if (!this.err.phone.length) {
+        delete this.err.name;
+      }
+      this.check = true;
+      // if (!this.dataForm.time) {
+      //   this.err.time.push ('Не забедьте указать удобное время для связи.');
+      // }
+      // if (this.dataForm.time) {
+      //   delete this.err.time;
+      // }
+      // const count = this.err.name.length + this.err.phone.length;
      
+      // let count = 0;
+      // for (let key in this.invalidForm) {
+      //  if (this.invalidForm[key]) count++;
+      // }
+      return count;
+    },
+    async sendEmail(event) {
+    this.err = {};
       const errors = this.checkForm(); 
-   
-      if(errors){
-         this.error="Пожалуйста, заполните корректно поля!"
-      }
-      else { 
-          this.error = null
+        if(errors){
+          event.preventDefault()
+          console.log(errors);
+        }
+        else { 
+          this.err = {};
           const response = await fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
-          if(!response.ok) { throw new Error(`Ошибка, статус ошибки ${response.status}`);}
-             else { 
-              return  Swal.fire({
-               position: 'top-end',
-               icon: 'success',
-               title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
-               showConfirmButton: true,
+          if(response.ok) { 
+            Swal.fire({
+            icon: 'success',
+            title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
+            showConfirmButton: true,
+            })
+          }
+            else { 
+              Swal.fire({
+              icon: 'error',
+              title: `Ошибка, статус ошибки ${response.status}`,
+              showConfirmButton: true,
               })
-             }
-      }
+            }
+        }
     }
   }  
 }
@@ -126,7 +164,6 @@ export default {
   position: absolute;
   right: 2%;
   color: lightgrey;
-  
 }
 .valid {
   border-color: black;
@@ -150,7 +187,7 @@ export default {
 }
 .btn:hover {
     background-color: #FFFAFA;
-    }
+}
 .btn-send {
   text-transform: uppercase;
   margin-bottom: 1rem;
@@ -159,17 +196,13 @@ export default {
 .form {
   display: flex;
   align-items: center;
-  text-transform: uppercase;
   flex-direction: column;
   padding: 1rem;
 }
-
 .contacts-in-modal {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  text-transform: uppercase;
-  /* margin-bottom: 1rem; */
   flex-direction: column;
   width: 100%;
 }
@@ -179,7 +212,7 @@ export default {
   flex: 2;
 }
 .input-data {
-  flex: 2;
+  flex: 3;
   height: 2rem;
   font-size: 1rem;
 }
@@ -190,10 +223,12 @@ export default {
   align-items: center;
   justify-content: flex-end;
   width: 90%;
+  text-transform: uppercase;
 }
 .error {
-    font-size: 15px;
-    color: red;
+  display: flex;
+  margin-bottom: 1rem;
+  font-size: 15px;
+  color: red;
 }
-
 </style>
