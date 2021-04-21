@@ -68,22 +68,24 @@ export default {
     },
     checkForm () {
       let count = 0;
-      for (let key in this.invalidForm)
-      if (this.invalidForm[key]) count++;
-      return count;
+      for (let key in this.invalidForm) {
+       if (this.invalidForm[key]) count++;
+        return count;
+      }
     },
       
     
     async sendEmail() {
      
-      let errors = 0;
-      errors = this.checkForm(); 
+      const errors = this.checkForm(); 
    
-      if(!errors){
+      if(errors){
+         this.error="Пожалуйста, заполните корректно поля!"
+      }
+      else { 
           this.error = null
           const response = await fetch('\sendemail.php',{method: 'POST', body: this.dataForm});
-          
-            if(!response.ok) { throw new Error(`Ошибка, статус ошибки ${response.status}`);}
+          if(!response.ok) { throw new Error(`Ошибка, статус ошибки ${response.status}`);}
              else { 
               return  Swal.fire({
                position: 'top-end',
@@ -92,12 +94,9 @@ export default {
                showConfirmButton: true,
               })
              }
-      } else { 
-         this.error="Пожалуйста, заполните корректно поля!"
-        }
-        
+      }
     }
-  }
+  }  
 }
 </script>
 
