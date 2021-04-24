@@ -10,7 +10,7 @@
       <main class="contacts-in-modal">
         <label class="form-row">
           <span class="title">имя</span>
-          <input class="input-data" type="text" id="name" tabindex=1 :class="{'invalid-field': invalidForm.name && dataForm.name}" placeholder="Имя" v-model="dataForm.name">
+          <input class="input-data" type="text" id="name" tabindex=1 :class="{'invalid-field': (invalidForm.name && dataForm.name) || status}" placeholder="Имя" v-model="dataForm.name">
         </label>
         <label class="form-row">
           <span class="title">телефон</span>
@@ -45,6 +45,7 @@ export default {
     },
     times: ['09:00','10:00','11:00','12:00'],
     error: null,
+    status: false,
   }),
   computed: {
     invalidForm () { 
@@ -74,6 +75,7 @@ export default {
       this.error = '';
     },
     checkForm () {
+      this.status = true;
       let count = 0;
       // for (let key in this.dataForm) {
       //   if (!this.dataForm[key]) {
