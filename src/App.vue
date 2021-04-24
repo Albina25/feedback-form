@@ -2,7 +2,7 @@
   <div id="app">
     <button class="btn" type="button" @click="openModal">Заказать звонок</button>
     <modal name="emailForm" height= 'auto'>
-    <form class="form" @submit.prevent="sendEmail()">
+    <form class="form" @submit.prevent="sendEmail">
       <header class="header-modal">
         <div class="title-form">заказать звонок</div>
         <i class="icon-close far fa-times-circle fa-lg" @click="closeModal"></i>
@@ -10,7 +10,7 @@
       <main class="contacts-in-modal">
         <label class="form-row">
           <span class="title">имя</span>
-          <input class="input-data" type="text" id="name" tabindex=1 :class="{'invalid-field': invalidForm.name}" placeholder="Имя" v-model="dataForm.name">
+          <input class="input-data" type="text" id="name" tabindex=1 :class="{'invalid-field': invalidForm.name && dataForm.name}" placeholder="Имя" v-model="dataForm.name">
         </label>
         <label class="form-row">
           <span class="title">телефон</span>
@@ -41,68 +41,86 @@ export default {
     dataForm: {
       name: null,
       phone: '',
-      timeOfCalling: null,
+      timeOfCalling: '',
     },
     times: ['09:00','10:00','11:00','12:00'],
     error: null,
   }),
   computed: {
     invalidForm () { 
+
       return { 
-        name: !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name),
+        // name: this.validName(),
+        name: !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) ? true : false,
         phone: this.dataForm.phone && this.dataForm.phone.length !== 10 ? true : false
       } 
-    },
+    }
   },
   methods: {
     openModal() {
       this.$modal.show('emailForm')
     },
     closeModal() {
-      this.$modal.hide('emailForm')
+      this.$modal.hide('emailForm');
+      this.resetModal();
+    },
+    validName() {
+      return this.dataForm.name ? !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) : false 
+    },
+    resetModal() {
+      for (let key in this.dataForm) {
+        this.dataForm[key] = ''
+      } 
+      this.error = '';
     },
     checkForm () {
       let count = 0;
-      if (!this.dataForm.name) {
-        this.invalidForm.name = true;
-        count++
-      }
-      if (!this.dataForm.phone) {
-        this.invalidForm.phone = true; 
-        count++;
-      }
+      // for (let key in this.dataForm) {
+      //   if (!this.dataForm[key]) {
+      //     this.invalidForm[key] = true;
+      //     count++;
+      //   }
+      // }
       for (let key in this.invalidForm) {
         if (this.invalidForm[key])
           count++;
       }
       return count;
-  
+    },
+    sendAlert(type) {
+      if (type === 'success') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
+          showConfirmButton: true,
+        })
+      }
+      if (type === 'fail') {
+        Swal.fire({
+          icon: 'error',
+          title: `Ошибка, статус ошибки ${response.status}`,
+          showConfirmButton: true,
+        })
+      }
     },
     async sendEmail() {
-      const errors = this.checkForm(); 
-        if(errors){
-          this.error = "Пожалуйста, заполните поля корректно.";
-          // event.preventDefault()
-          console.log(errors);
+      
+      if(this.checkForm()){
+        this.error = "Пожалуйста, заполните поля корректно.";
+        // event.preventDefault()
+        console.log(this.checkForm())
+      }
+      else { 
+        this.error = '';
+        const response = await fetch('\sendemail.php',{method: 'POST',  url:'sendemail.php', body: JSON.stringify(this.dataForm)});
+        if(response.ok) { 
+          
+          this.sendAlert(success);
         }
         else { 
-          this.err = {};
-          const response = await fetch('\sendemail.php',{method: 'POST', body: JSON.stringify(this.dataForm)});
-          if(response.ok) { 
-            Swal.fire({
-            icon: 'success',
-            title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
-            showConfirmButton: true,
-            })
-          }
-            else { 
-              Swal.fire({
-              icon: 'error',
-              title: `Ошибка, статус ошибки ${response.status}`,
-              showConfirmButton: true,
-              })
-            }
+          this.sendAlert(fail);
         }
+      }
     }
   }  
 }
