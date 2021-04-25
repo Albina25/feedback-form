@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <button class="btn" type="button" @click="openModal">Заказать звонок</button>
-    <modal name="emailForm" height= 'auto'>
-    <form class="form" @submit.prevent="sendEmail">
+    <modal name="emailForm" height="auto" adaptive>
+    <form class="form" method="post" @submit.prevent="sendEmail">
       <header class="header-modal">
         <div class="title-form">заказать звонок</div>
         <i class="icon-close far fa-times-circle fa-lg" @click="closeModal"></i>
@@ -10,15 +10,15 @@
       <main class="contacts-in-modal">
         <label class="form-row">
           <span class="title">имя</span>
-          <input class="input-data" type="text" id="name" tabindex=1 :class="{'invalid-field': (invalidForm.name && dataForm.name) || status}" placeholder="Имя" v-model="dataForm.name">
+          <input class="input-data" type="text" name="name" tabindex=1 :class="{'invalid-field': invalidForm.name && (dataForm.name || check)}" placeholder="Имя" v-model="dataForm.name">
         </label>
         <label class="form-row">
           <span class="title">телефон</span>
-            <the-mask class="input-data" :mask="['7(###) ###-##-##']" tabindex=2 id="phone" :class="{'invalid-field': invalidForm.phone}" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
+            <the-mask class="input-data" :mask="['7(###) ###-##-##']" tabindex=2 name="phone" :class="{'invalid-field': invalidForm.phone && (dataForm.phone || check) }" placeholder="7(___) ___-__-__" v-model="dataForm.phone"/>
         </label>
         <label class="form-row">
           <span class="title">время звонка</span>
-            <select class="input-data" id="time" tabindex=3 v-model="dataForm.timeOfCalling">
+            <select class="input-data" name="time" tabindex=3 v-model="dataForm.timeOfCalling">
             <option v-for="(time, index) of times" :key="index">{{time}}</option> 
             </select>
         </label>
@@ -45,15 +45,13 @@ export default {
     },
     times: ['09:00','10:00','11:00','12:00'],
     error: null,
-    status: false,
+    check: false,
   }),
   computed: {
     invalidForm () { 
-
       return { 
-        // name: this.validName(),
-        name: !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) ? true : false,
-        phone: this.dataForm.phone && this.dataForm.phone.length !== 10 ? true : false
+        name: this.dataForm.name ? !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) : true,
+        phone: this.dataForm.phone ? this.dataForm.phone.length !== 10 : true
       } 
     }
   },
@@ -65,24 +63,17 @@ export default {
       this.$modal.hide('emailForm');
       this.resetModal();
     },
-    validName() {
-      return this.dataForm.name ? !/^[A-Za-zА-Яа-яЁё]*$/i.test(this.dataForm.name) : false 
-    },
     resetModal() {
       for (let key in this.dataForm) {
         this.dataForm[key] = ''
       } 
       this.error = '';
+      this.check = false;
     },
     checkForm () {
-      this.status = true;
+      this.check = true;
       let count = 0;
-      // for (let key in this.dataForm) {
-      //   if (!this.dataForm[key]) {
-      //     this.invalidForm[key] = true;
-      //     count++;
-      //   }
-      // }
+      
       for (let key in this.invalidForm) {
         if (this.invalidForm[key])
           count++;
@@ -109,18 +100,26 @@ export default {
       
       if(this.checkForm()){
         this.error = "Пожалуйста, заполните поля корректно.";
-        // event.preventDefault()
-        console.log(this.checkForm())
       }
       else { 
         this.error = '';
-        const response = await fetch('\sendemail.php',{method: 'POST',  url:'sendemail.php', body: JSON.stringify(this.dataForm)});
+        const response = await fetch('sendemail.php',{
+          method: 'POST',
+          body: JSON.stringify(this.dataForm),
+          headers: {
+                'Content-Type': 'application/json', 
+            }
+        });
         if(response.ok) { 
-          
-          this.sendAlert(success);
+          Swal.fire({
+          icon: 'success',
+          title: 'Ваша заявка успешно отправлена, с Вами скоро свяжется наш оператор',
+          showConfirmButton: true,
+        })
         }
         else { 
-          this.sendAlert(fail);
+         this.sendAlert(fail);
+        
         }
       }
     }
@@ -205,6 +204,7 @@ export default {
   flex: 3;
   height: 2rem;
   font-size: 1rem;
+  outline: none;
 }
 .form-row {
   display: flex;
@@ -220,5 +220,17 @@ export default {
   margin-bottom: 1rem;
   font-size: 15px;
   color: red;
+}
+.email-modal {
+  height:auto;
+}
+@media only screen and (max-width: 768px) and (orientation: portrait) {
+  .form-row {
+  flex-direction: column;
+  },
+  .email-modal {
+  height:auto;
+  width: 100vw;
+  }
 }
 </style>
